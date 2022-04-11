@@ -1,0 +1,22 @@
+telnet:
+  port: 3000
+spring:
+  datasource:
+    url: jdbc:h2:mem:rpcdb
+    initialization-mode: never
+
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+
+    properties:
+      hibernate:
+        format_sql: true
+
+    show-sql: true
+
+
+logging:
+  level:
+    ROOT: INFO
