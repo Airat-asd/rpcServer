@@ -34,8 +34,18 @@ public class RpsService {
                 this.channelHandlerContextMap.add(ctx);
                 //Аутентификация не реализована
                 Player player = saveNewOrMergeOldPlayer(ctx, name);
-                ctx.write("Search a player 2...\r\n");
-                setPlayerToGame(ctx, player);
+                try {
+                    Game game = gameService.setPlayer(player);
+                    if (game.playersAreReady()) {
+                        sendMessage(game);
+                    } else {
+                        ctx.write("Search a player 2...\r\n");
+                    }
+                } catch (RpcException e) {
+                    this.channelHandlerContextMap.remove(ctx);
+                    log.warn(e.getMessage());
+                    ctx.write(e.getMessage() + "\r\n");
+                }
             } else {
                 ctx.write("You are already registered!\r\n");
             }
@@ -44,24 +54,15 @@ public class RpsService {
         }
     }
 
-    private void setPlayerToGame(ChannelHandlerContext ctx, Player player) {
-        Game game;
-        try {
-            game = gameService.setPlayer(player);
-            if (game.playersAreReady()) {
-                ChannelHandlerContext ctx1 =
-                        getChannelHandlerContext(game.getPlayer1().getSession()).orElseThrow(() -> new RuntimeException("Session doesn't found"));
-                ctx1.write(String.format("Player %s has been found. Start the battle.\r\n", game.getPlayer2().getName()));
-                ctx1.flush();
-                ChannelHandlerContext ctx2 =
-                        getChannelHandlerContext(game.getPlayer2().getSession()).orElseThrow(() -> new RuntimeException("Session doesn't found"));
-                ctx2.write(String.format("Player %s has been found. Start the battle.\r\n", game.getPlayer1().getName()));
-                ctx2.flush();
-            }
-        } catch (RpcException e) {
-            log.warn(e.getMessage());
-            ctx.write(e.getMessage() + "\r\n");
-        }
+    private void sendMessage(Game game) {
+        ChannelHandlerContext ctx1 =
+                getChannelHandlerContext(game.getPlayer1().getSession()).orElseThrow(() -> new RuntimeException("Session doesn't found"));
+        ctx1.write(String.format("Player %s has been found. Start the battle.\r\n", game.getPlayer2().getName()));
+        ctx1.flush();
+        ChannelHandlerContext ctx2 =
+                getChannelHandlerContext(game.getPlayer2().getSession()).orElseThrow(() -> new RuntimeException("Session doesn't found"));
+        ctx2.write(String.format("Player %s has been found. Start the battle.\r\n", game.getPlayer1().getName()));
+        ctx2.flush();
     }
 
     private Optional<ChannelHandlerContext> getChannelHandlerContext(String idChannel) {
