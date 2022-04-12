@@ -5,10 +5,8 @@ import lombok.*;
 
 import javax.persistence.*;
 
-
 @Getter
 @Setter
-@ToString
 @Entity
 @Builder
 @NoArgsConstructor
@@ -23,10 +21,4 @@ public class Player {
     private String session;
     @OneToOne
     private Game game;
-
-    public void closePlayerConnection(){
-        gameResult = null;
-        weapon = null;
-        session = null;
-    }
 }

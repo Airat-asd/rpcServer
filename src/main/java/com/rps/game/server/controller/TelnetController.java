@@ -18,37 +18,34 @@ public class TelnetController extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        ctx.write("Welcome to the game - Rock, Paper, Scissors!\r\n");
-        ctx.write("To start the game, please register, to do this, enter command \"register [YOU NAME]\" and press ENTER:\r\n");
+        ctx.write("Welcome to the game - Rock, Paper, Scissors! To start the game, please register, to do this, enter command \"register [YOU NAME]\" and press ENTER:\r\n");
         ctx.flush();
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, String request) throws InterruptedException {
-        log.info("channelRead0");
+    public void channelRead0(ChannelHandlerContext ctx, String request) {
         requestHandler(ctx, request);
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        log.info("channelReadComplete");
         ctx.flush();
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        log.error(cause.getMessage(), cause);
         ctx.close();
     }
 
-    private void requestHandler(ChannelHandlerContext ctx, String request) throws InterruptedException {
+    private void requestHandler(ChannelHandlerContext ctx, String request) {
         if (request.contains(Command.REGISTER.getValue())) {
             rpsService.registerOrAuthenticationPlayer(ctx, request);
         } else if (request.contains(Command.SCISSORS.getValue()) || request.contains(Command.ROCK.getValue()) ||
                 request.contains(Command.PAPER.getValue())) {
             rpsService.battle(ctx, request);
         } else if (request.contains(Command.EXIST.getValue())) {
-//            rpsService.closeConnection(ctx);
+            rpsService.closeConnection(ctx);
         }
     }
 }

@@ -23,8 +23,12 @@ public class Game {
     private Player player1;
     @OneToOne
     private Player player2;
-    private String weapon1;
-    private String weapon2;
+    private Weapon weapon1;
+    private Weapon weapon2;
+
+    public Game(String id) {
+        this.id = id;
+    }
 
     public boolean setPlayers(Player player) {
         if (player1 == null) {
